@@ -1,25 +1,66 @@
-import logo from './logo.svg';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
+import io from 'socket.io-client'
+import LoginPage from './components/Login/LoginPage';
+
+const BACKEND_URL = 'https://localhost'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [token, setToken] = useState("")
+    const [socket, setSocket] = useState(null)
+    //const [messages, setMessages] = useState([])
+
+
+    useEffect(() => {
+        if (token){
+            const newSocket = io(`${BACKEND_URL}`, {
+                path: "/app/test",
+                transports: ["websocket"],
+                withCredentials: true,
+                auth: {
+                    token
+                }
+            })
+            setSocket(newSocket)
+
+            return () => {
+                newSocket.close()
+            }
+            // const sc = new WebSocket("wss://localhost/")
+            // setSocket(sc)
+        }
+
+    }, [token])
+
+    // useEffect(() => {
+    //     if (socket){
+    //         socket.on("topic/response", handleMessage)
+    //     }
+    // }, [socket])
+
+    const handleSendTest = () => {
+        // socket.emit("test")
+    }
+
+    // const handleMessage = msg => {
+    //     console.log(msg)
+    // }
+
+
+    return (
+        <div className="App">
+            <h1>Test</h1>
+            {
+                !!token
+                ? 
+                    <div>
+                        <button onClick={handleSendTest}>app/test1</button>
+                    </div>
+                :
+                    <LoginPage loginUrl={`${BACKEND_URL}/login`} onLogon={token => setToken(token)}/>
+            }
+        </div>
+    );
 }
 
 export default App;
